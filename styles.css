@@ -61,7 +61,9 @@ p {
 .info-grid span,
 .meter-head span,
 .alert-card span,
-.alert-card small {
+.alert-card small,
+.method-strip p,
+.method-strip span {
   color: var(--muted);
 }
 
@@ -478,7 +480,6 @@ td.scale-cell small {
 }
 
 .method-strip span {
-  color: var(--muted);
   font-size: 12px;
   font-weight: 800;
 }
@@ -489,7 +490,6 @@ td.scale-cell small {
 }
 
 .method-strip p {
-  color: var(--muted);
   font-size: 13px;
   line-height: 1.4;
 }
@@ -678,11 +678,170 @@ body {
   box-shadow: 0 3px 0 #1b2632;
 }
 
+.test-controls {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+}
+
+.test-button {
+  min-height: 52px;
+  border: 3px solid #1b2632;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #ffffff, #fff5c9);
+  box-shadow: 0 5px 0 #1b2632;
+  color: #17243a;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.test-button.secondary {
+  background: linear-gradient(180deg, #ffffff, #e8eef7);
+}
+
+.test-button.warn,
+.test-button.weak {
+  background: linear-gradient(180deg, #fff7c8, #f2b429);
+}
+
+.test-button.stable {
+  background: linear-gradient(180deg, #e9fff2, #8ee2ae);
+}
+
+.test-button.medium {
+  background: linear-gradient(180deg, #e8f2ff, #75aef5);
+}
+
+.test-button.danger {
+  background: linear-gradient(180deg, #ffe6e3, #ff7369);
+}
+
+.test-button:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #1b2632;
+}
+
+.isac-hero {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.32fr) minmax(280px, 0.68fr);
+  gap: 12px;
+  align-items: stretch;
+}
+
+.video-stage,
+.isac-decision,
+.comm-grid article,
+.isac-log {
+  border: 3px solid #1b2632;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #ffffff, #fff8d8);
+  box-shadow: 0 6px 0 rgba(27, 38, 50, 0.92), 0 18px 34px rgba(39, 68, 96, 0.13);
+}
+
+.video-stage {
+  position: relative;
+  overflow: hidden;
+  min-height: 330px;
+}
+
+#videoCanvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 330px;
+  object-fit: cover;
+  background: #17243a;
+}
+
+.video-hud {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 3px solid #1b2632;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.88);
+  padding: 9px 12px;
+  color: #17243a;
+  font-weight: 900;
+}
+
+.isac-decision {
+  min-height: 330px;
+  padding: 18px;
+  display: grid;
+  align-content: center;
+  gap: 14px;
+}
+
+.isac-decision span,
+.comm-grid article span {
+  color: #1f6fd2;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.isac-decision strong {
+  font-size: clamp(42px, 7vw, 70px);
+  line-height: 1;
+}
+
+.isac-decision p {
+  color: #506176;
+  font-size: 15px;
+  line-height: 1.48;
+}
+
+.isac-controls {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.comm-grid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.comm-grid article {
+  min-height: 94px;
+  padding: 13px;
+  display: grid;
+  align-content: center;
+  gap: 8px;
+}
+
+.comm-grid article strong {
+  color: #17243a;
+  font-size: 20px;
+  line-height: 1.1;
+}
+
+.comm-grid article b {
+  font-size: 26px;
+}
+
+.isac-log {
+  margin-top: 18px;
+  overflow: hidden;
+}
+
 .motion-visual,
 .motion-table-wrap,
 .alert-card,
 .info-grid div,
-.method-strip div {
+.method-strip div,
+.comm-grid article,
+.isac-log {
   background: linear-gradient(180deg, #ffffff, #fff8d8);
 }
 
@@ -738,6 +897,10 @@ body {
 
 @media (max-width: 760px) {
   .topbar,
+  .test-controls,
+  .isac-controls,
+  .isac-hero,
+  .comm-grid,
   .method-strip,
   .alert-grid,
   .motion-panel,
@@ -750,6 +913,17 @@ body {
     grid-template-columns: 1fr;
     justify-items: center;
     text-align: center;
+  }
+
+  .video-stage,
+  .isac-decision,
+  #videoCanvas {
+    min-height: 260px;
+  }
+
+  .video-hud {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .hero-panel {

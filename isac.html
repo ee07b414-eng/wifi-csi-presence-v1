@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>通信感知一体化测试台</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div>
+          <h1>通信感知一体化测试台</h1>
+        </div>
+        <div class="status-pill ok" id="linkStatus">模拟链路就绪</div>
+      </header>
+
+      <section class="isac-hero" aria-label="通信感知一体化主视图">
+        <div class="video-stage">
+          <canvas id="videoCanvas" width="640" height="360" aria-label="类视频业务流画面"></canvas>
+          <div class="video-hud">
+            <span id="streamState">业务流暂停</span>
+            <strong id="frameId">Frame 0000</strong>
+          </div>
+        </div>
+        <div class="isac-decision">
+          <span>CSI Sensing Decision</span>
+          <strong id="presenceState">待初始化</strong>
+          <p id="presenceText">启动业务流后，可同时观察视频链路质量与 CSI 感知判断。</p>
+          <div class="change-meter" aria-label="感知置信度">
+            <div class="meter-head">
+              <span>感知置信度</span>
+              <strong><span id="presenceScore">0</span>/100</strong>
+            </div>
+            <div class="score-bar"><span id="scoreFill"></span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="isac-controls" aria-label="通信感知测试控制">
+        <button class="test-button danger" id="streamToggle">启动业务流</button>
+        <button class="test-button secondary" data-profile="low">低码率</button>
+        <button class="test-button medium" data-profile="balanced">均衡码率</button>
+        <button class="test-button danger" data-profile="high">高码率</button>
+        <button class="test-button stable" data-channel="good">良好信道</button>
+        <button class="test-button warn" data-channel="congested">拥塞信道</button>
+        <button class="test-button danger" data-channel="fading">衰落信道</button>
+        <button class="test-button stable" data-sensing="stable">静稳</button>
+        <button class="test-button weak" data-sensing="weak">微动作</button>
+        <button class="test-button medium" data-sensing="active">有人活动</button>
+      </section>
+
+      <section class="comm-grid" aria-label="通信性能">
+        <article>
+          <span>吞吐量</span>
+          <strong><b id="throughput">0.00</b> Mbps</strong>
+        </article>
+        <article>
+          <span>视频帧率</span>
+          <strong><b id="fps">0.0</b> FPS</strong>
+        </article>
+        <article>
+          <span>端到端时延</span>
+          <strong><b id="latency">0</b> ms</strong>
+        </article>
+        <article>
+          <span>抖动</span>
+          <strong><b id="jitter">0</b> ms</strong>
+        </article>
+        <article>
+          <span>丢包率</span>
+          <strong><b id="lossRate">0.0</b>%</strong>
+        </article>
+        <article>
+          <span>链路评分</span>
+          <strong><b id="linkScore">0</b>/100</strong>
+        </article>
+      </section>
+
+      <section class="alert-grid" aria-label="感知门控">
+        <article class="alert-card idle" id="changeCard">
+          <span>Gate I · Robust CSI Projection</span>
+          <strong id="changeStatus">待初始化</strong>
+          <p id="changeText">通信业务流未启动</p>
+          <small>分数 <b id="changeScore">0</b> / 阈值 <b id="changeThreshold">45</b></small>
+        </article>
+        <article class="alert-card idle" id="paperCard">
+          <span>Gate II · Doppler-NMI Graph</span>
+          <strong id="paperStatus">待初始化</strong>
+          <p id="paperText">等待动态子载波响应</p>
+          <small>分数 <b id="paperScore">0</b> / 阈值 <b id="paperThreshold">48</b></small>
+        </article>
+        <article class="alert-card idle" id="combinedCard">
+          <span>Fusion · ISAC Decision</span>
+          <strong id="combinedStatus">待初始化</strong>
+          <p id="combinedText">同步观察通信性能和感知结果</p>
+          <small>分数 <b id="combinedScore">0</b> / 阈值 <b id="combinedThreshold">连续确认</b></small>
+        </article>
+      </section>
+
+      <section class="isac-log" aria-label="业务流事件">
+        <div class="motion-table-wrap">
+          <table class="motion-table">
+            <thead>
+              <tr>
+                <th>时间</th>
+                <th>事件</th>
+                <th>通信状态</th>
+                <th>感知状态</th>
+              </tr>
+            </thead>
+            <tbody id="eventRows">
+              <tr>
+                <td colspan="4">启动业务流后记录事件</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script src="./isac.js?v=version4-isac-20260528"></script>
+  </body>
+</html>

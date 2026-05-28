@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WiFi CSI 电磁感知测试页</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div>
+          <h1>WiFi CSI 电磁感知测试页</h1>
+        </div>
+        <div class="status-pill ok" id="serialStatus">模拟数据源</div>
+      </header>
+
+      <section class="hero-panel" aria-label="测试判断">
+        <div class="judgement idle" id="presenceState">待初始化</div>
+        <p id="presenceText">测试页待机。</p>
+        <div class="change-meter" aria-label="双门控融合判决分数">
+          <div class="meter-head">
+            <span>双门控融合判决</span>
+            <strong><span id="presenceScore">0</span>/100</strong>
+          </div>
+          <div class="score-bar"><span id="scoreFill"></span></div>
+        </div>
+      </section>
+
+      <section class="test-controls" aria-label="测试控制">
+        <button class="test-button secondary" data-scenario="idle">待机</button>
+        <button class="test-button warn" data-scenario="prep">准备 5 秒</button>
+        <button class="test-button stable" data-scenario="stable">静稳</button>
+        <button class="test-button weak" data-scenario="weak">微动作</button>
+        <button class="test-button medium" data-scenario="medium">中等活动</button>
+        <button class="test-button danger" data-scenario="strong">强活动</button>
+      </section>
+
+      <section class="alert-grid" aria-label="三层判定提醒">
+        <article class="alert-card idle" id="changeCard">
+          <span>Gate I · Robust CSI Projection</span>
+          <strong id="changeStatus">待初始化</strong>
+          <p id="changeText">归一化 CSI 形态漂移检测</p>
+          <small>分数 <b id="changeScore">0</b> / 阈值 <b id="changeThreshold">--</b></small>
+        </article>
+        <article class="alert-card idle" id="paperCard">
+          <span>Gate II · Doppler-NMI Graph</span>
+          <strong id="paperStatus">待初始化</strong>
+          <p id="paperText">Doppler-NMI 图与 QAOA 分区映射</p>
+          <small>分数 <b id="paperScore">0</b> / 阈值 <b id="paperThreshold">--</b></small>
+        </article>
+        <article class="alert-card idle" id="combinedCard">
+          <span>Fusion · Dual-Gate Decision</span>
+          <strong id="combinedStatus">待初始化</strong>
+          <p id="combinedText">双门控 OR 融合与时间持续性判决</p>
+          <small>分数 <b id="combinedScore">0</b> / 阈值 <b id="combinedThreshold">连续确认</b></small>
+        </article>
+      </section>
+
+      <section class="motion-panel" aria-label="动作尺度时间轴">
+        <div class="motion-visual">
+          <div class="motion-mascot" id="motionOrb" aria-label="放电动作尺度动画">
+            <div class="spark spark-a"></div>
+            <div class="spark spark-b"></div>
+            <div class="spark spark-c"></div>
+            <div class="bolt bolt-left"></div>
+            <div class="bolt bolt-right"></div>
+            <div class="mascot-body">
+              <span id="motionScale">0</span>
+              <small>动作尺度</small>
+            </div>
+          </div>
+          <div class="motion-copy">
+            <span>Activity Scale-Time Trace</span>
+            <strong id="motionLevel">等待数据</strong>
+            <p id="motionDuration">持续时间 0.0 秒</p>
+          </div>
+        </div>
+        <div class="motion-table-wrap">
+          <table class="motion-table">
+            <thead>
+              <tr>
+                <th>时间</th>
+                <th>动作尺度</th>
+                <th>持续</th>
+                <th>触发来源</th>
+              </tr>
+            </thead>
+            <tbody id="motionTimelineBody">
+              <tr>
+                <td colspan="4">有动作时自动记录</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="info-grid" aria-label="实时状态">
+        <div>
+          <span>投影状态</span>
+          <strong id="calibStatus">未建立</strong>
+        </div>
+        <div>
+          <span>模拟 CSI 包</span>
+          <strong id="packetCount">0</strong>
+        </div>
+        <div>
+          <span>RSSI</span>
+          <strong id="rssiValue">--</strong>
+        </div>
+        <div>
+          <span>幅度偏移</span>
+          <strong id="ampShift">0.00</strong>
+        </div>
+      </section>
+    </main>
+
+    <script src="./test.js?v=version3-test-20260528"></script>
+  </body>
+</html>

@@ -98,7 +98,7 @@ function bindEvents() {
 
 async function startMonitoring() {
   if (!("serial" in navigator)) {
-    setError("当前浏览器不支持串口。请用 Chrome 打开这个网页后再点开始监测。");
+    setError("当前环境不支持网页串口。手机端 Chrome/Safari 通常不能直接连接 ESP32；请在电脑端 Chrome 或 Edge 打开此页并通过 USB 连接接收端。若要手机查看结果，需要让 Mac 作为采集服务器转发数据。");
     return;
   }
 

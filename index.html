@@ -29,6 +29,37 @@
 
       <button id="mainButton" class="main-button">开始监测</button>
 
+      <section class="motion-panel" aria-label="动作尺度时间轴">
+        <div class="motion-visual">
+          <div class="motion-orb" id="motionOrb">
+            <span id="motionScale">0</span>
+            <small>动作尺度</small>
+          </div>
+          <div class="motion-copy">
+            <span>Activity Scale-Time Trace</span>
+            <strong id="motionLevel">等待数据</strong>
+            <p id="motionDuration">持续时间 0.0 秒</p>
+          </div>
+        </div>
+        <div class="motion-table-wrap">
+          <table class="motion-table">
+            <thead>
+              <tr>
+                <th>时间</th>
+                <th>动作尺度</th>
+                <th>持续</th>
+                <th>触发来源</th>
+              </tr>
+            </thead>
+            <tbody id="motionTimelineBody">
+              <tr>
+                <td colspan="4">开始监测后实时更新</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
       <section class="alert-grid" aria-label="三层判定提醒">
         <article class="alert-card idle" id="changeCard">
           <span>Gate I · Robust CSI Projection</span>

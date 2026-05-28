@@ -44,6 +44,9 @@ const state = {
   totalPackets: 0,
   latestResult: null,
   history: [],
+  currentMotionStartAt: 0,
+  lastMotionRowAt: 0,
+  motionRows: [],
 };
 
 const els = {};
@@ -81,6 +84,11 @@ function cacheElements() {
     "combinedText",
     "combinedScore",
     "combinedThreshold",
+    "motionOrb",
+    "motionScale",
+    "motionLevel",
+    "motionDuration",
+    "motionTimelineBody",
   ].forEach((id) => {
     els[id] = document.getElementById(id);
   });
@@ -884,6 +892,7 @@ function renderIdle(message = "点击开始监测。前 10 秒保持环境稳定
   els.mainButton.classList.remove("stop");
   els.mainButton.disabled = false;
   renderLayerCardsIdle();
+  renderMotionIdle();
 }
 
 function renderBaseline() {
@@ -901,6 +910,7 @@ function renderBaseline() {
   els.packetCount.textContent = String(state.totalPackets);
   renderLatestPacket();
   renderLayerCardsBaseline(remain);
+  renderMotionBaseline(remain);
   setRunningButton();
 }
 
@@ -914,6 +924,7 @@ function renderMonitoring(result) {
   els.packetCount.textContent = String(state.totalPackets);
   renderLatestPacket(safeResult);
   renderLayerCardsMonitoring(safeResult);
+  renderMotionTimeline(safeResult);
   setSerialStatus("串口已连接", "ok");
   setRunningButton();
 }
@@ -923,6 +934,105 @@ function renderLatestPacket(result = state.latestResult) {
   els.rssiValue.textContent = latest && Number.isFinite(latest.rssi) ? `${latest.rssi} dBm` : "--";
   const ampShift = result?.z?.ampMean || 0;
   els.ampShift.textContent = ampShift.toFixed(2);
+}
+
+function renderMotionIdle() {
+  state.currentMotionStartAt = 0;
+  setMotionPanel(0, "等待数据", "持续时间 0.0 秒", false);
+  renderMotionRows();
+}
+
+function renderMotionBaseline(remain) {
+  setMotionPanel(0, "投影建模", `投影剩余 ${remain} 秒`, false);
+}
+
+function renderMotionTimeline(result) {
+  const now = nowMs();
+  const scale = computeMotionScale(result);
+  const active = Boolean(result.present || result.changeHit || result.paperHit || scale >= 45);
+
+  if (active && !state.currentMotionStartAt) {
+    state.currentMotionStartAt = now;
+  } else if (!active) {
+    state.currentMotionStartAt = 0;
+  }
+
+  const durationMs = state.currentMotionStartAt ? now - state.currentMotionStartAt : 0;
+  const level = motionLevelText(scale, active);
+  const trigger = motionTriggerText(result, scale);
+  setMotionPanel(scale, level, `持续时间 ${formatDuration(durationMs)}`, active);
+
+  if (now - state.lastMotionRowAt >= 1000) {
+    state.lastMotionRowAt = now;
+    state.motionRows.unshift({
+      time: formatClock(now),
+      scale,
+      duration: formatDuration(durationMs),
+      trigger,
+    });
+    state.motionRows = state.motionRows.slice(0, 7);
+    renderMotionRows();
+  }
+}
+
+function computeMotionScale(result) {
+  const combined = Number(result?.score || 0);
+  const change = Number(result?.changeScore ?? result?.score ?? 0);
+  const paper = Number(result?.paperScore ?? result?.paper?.score ?? 0);
+  let scale = 0.42 * combined + 0.32 * change + 0.26 * paper;
+  if (result?.artifactReason && result.artifactReason !== "数据不足") {
+    scale = Math.min(scale, 35);
+  }
+  return Math.round(clamp(scale, 0, 100));
+}
+
+function motionLevelText(scale, active) {
+  if (!active && scale < 25) return "环境稳定";
+  if (scale >= 75) return "强活动";
+  if (scale >= 50) return "中等活动";
+  if (scale >= 30) return "微动作 / 弱扰动";
+  return "候选波动";
+}
+
+function motionTriggerText(result, scale) {
+  if (result?.present) return "融合判定";
+  if (result?.changeHit && result?.paperHit) return "双门控";
+  if (result?.paperHit) return "Doppler-NMI";
+  if (result?.changeHit) return "CSI 投影";
+  if (result?.artifactReason && result.artifactReason !== "数据不足") return "伪迹过滤";
+  if (scale >= 45) return "候选波动";
+  return "稳定";
+}
+
+function setMotionPanel(scale, level, durationText, active) {
+  if (!els.motionOrb) return;
+  els.motionOrb.style.setProperty("--motion-scale", String(clamp(scale, 0, 100)));
+  els.motionOrb.classList.toggle("active", active);
+  els.motionScale.textContent = String(Math.round(scale));
+  els.motionLevel.textContent = level;
+  els.motionDuration.textContent = durationText;
+}
+
+function renderMotionRows() {
+  if (!els.motionTimelineBody) return;
+  if (!state.motionRows.length) {
+    els.motionTimelineBody.innerHTML = '<tr><td colspan="4">开始监测后实时更新</td></tr>';
+    return;
+  }
+  els.motionTimelineBody.innerHTML = state.motionRows
+    .map(
+      (row) => `<tr><td>${row.time}</td><td>${row.scale}/100</td><td>${row.duration}</td><td>${row.trigger}</td></tr>`,
+    )
+    .join("");
+}
+
+function formatClock(timeMs) {
+  return new Date(timeMs).toLocaleTimeString("zh-CN", { hour12: false });
+}
+
+function formatDuration(durationMs) {
+  const seconds = Math.max(0, durationMs / 1000);
+  return seconds < 10 ? `${seconds.toFixed(1)} 秒` : `${Math.round(seconds)} 秒`;
 }
 
 function renderLayerCardsIdle() {
@@ -1006,6 +1116,7 @@ function setError(message) {
   els.mainButton.classList.remove("stop");
   els.mainButton.disabled = false;
   renderLayerCardsIdle();
+  renderMotionIdle();
 }
 
 function setStateLabel(text, className) {
@@ -1028,6 +1139,9 @@ function resetRun() {
   state.totalPackets = 0;
   state.latestResult = null;
   state.history = [];
+  state.currentMotionStartAt = 0;
+  state.lastMotionRowAt = 0;
+  state.motionRows = [];
   if (state.tickTimer) {
     window.clearInterval(state.tickTimer);
     state.tickTimer = null;

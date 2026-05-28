@@ -182,6 +182,144 @@ p {
   opacity: 0.72;
 }
 
+.motion-panel {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: 0.92fr 1.08fr;
+  gap: 10px;
+}
+
+.motion-visual,
+.motion-table-wrap {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.motion-visual {
+  min-height: 194px;
+  padding: 18px;
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  align-items: center;
+  gap: 18px;
+}
+
+.motion-orb {
+  --motion-scale: 0;
+  position: relative;
+  width: 150px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  border: 1px solid rgba(31, 111, 210, 0.22);
+  background:
+    radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.36) 34%, transparent 35%),
+    conic-gradient(from -90deg, var(--green), var(--amber), var(--red), var(--green));
+  transform: scale(calc(0.9 + var(--motion-scale) * 0.0016));
+  transition: transform 180ms ease, filter 180ms ease;
+}
+
+.motion-orb::before,
+.motion-orb::after {
+  content: "";
+  position: absolute;
+  inset: calc(10px - var(--motion-scale) * 0.035px);
+  border-radius: inherit;
+  border: 1px solid rgba(31, 111, 210, 0.18);
+  pointer-events: none;
+}
+
+.motion-orb::after {
+  inset: calc(20px - var(--motion-scale) * 0.05px);
+  border-color: rgba(214, 65, 65, 0.16);
+}
+
+.motion-orb.active {
+  filter: saturate(1.18);
+  animation: motionPulse 1.35s ease-in-out infinite;
+}
+
+.motion-orb span {
+  position: relative;
+  display: block;
+  font-size: 42px;
+  font-weight: 850;
+  line-height: 1;
+  color: var(--text);
+}
+
+.motion-orb small {
+  position: relative;
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.motion-copy span,
+.motion-table th {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.motion-copy strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 28px;
+  line-height: 1.12;
+}
+
+.motion-copy p {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.motion-table-wrap {
+  overflow: hidden;
+}
+
+.motion-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.motion-table th,
+.motion-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  font-size: 14px;
+  vertical-align: top;
+}
+
+.motion-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.motion-table td {
+  color: var(--text);
+}
+
+.motion-table td:nth-child(2) {
+  font-weight: 800;
+}
+
+@keyframes motionPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(31, 111, 210, 0.14), 0 0 0 0 rgba(214, 65, 65, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgba(31, 111, 210, 0.04), 0 0 0 24px rgba(214, 65, 65, 0.03);
+  }
+}
+
 .alert-grid {
   margin-top: 18px;
   display: grid;
@@ -265,9 +403,22 @@ p {
 @media (max-width: 760px) {
   .topbar,
   .alert-grid,
+  .motion-panel,
   .info-grid {
     display: grid;
     grid-template-columns: 1fr;
+  }
+
+  .motion-visual {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .motion-table th,
+  .motion-table td {
+    padding: 10px 8px;
+    font-size: 13px;
   }
 
   .hero-panel {

@@ -135,7 +135,7 @@ async function stopMonitoring() {
   }
   await closeSerial();
   if (wasRunning) {
-    renderIdle("监测已停止。点击开始监测可重新建立基线。");
+    renderIdle("监测已停止。点击开始监测可重新建立电磁环境投影。");
   } else {
     renderIdle();
   }
@@ -233,7 +233,7 @@ function tick() {
           threshold: baseline.threshold,
           present: false,
           artifactReason: "",
-          text: "基线已建立，正在实时监测电磁环境改变。",
+          text: "电磁环境投影已建立，正在实时监测 CSI 动态变化。",
         });
         return;
       }
@@ -425,7 +425,7 @@ function buildResultText(result, paper, changeHit, paperHit, present) {
     if (paperHit) {
       return "Doppler/NMI 层连续触发，判定为有人活动。";
     }
-    return "电磁环境变化层连续触发，判定为有人活动。";
+    return "鲁棒 CSI 投影门控连续触发，判定为有人活动。";
   }
   if (result.artifactReason) {
     return `${result.artifactReason}，暂不判定为人体活动。`;
@@ -436,7 +436,7 @@ function buildResultText(result, paper, changeHit, paperHit, present) {
   if (!paper.available) {
     return "正在积累 Doppler/NMI 二次判断所需的 CSI 数据。";
   }
-  return "电磁环境接近当前基线，未发现持续人体活动。";
+  return "CSI 动态特征接近当前电磁环境投影，未发现持续人体活动。";
 }
 
 function buildPaperBaseline(packets) {
@@ -871,7 +871,7 @@ function parseCsiLine(line) {
   };
 }
 
-function renderIdle(message = "点击开始监测。前 10 秒保持环境稳定，页面会自动建立电磁基线。") {
+function renderIdle(message = "点击开始监测。前 10 秒保持环境稳定，页面会自动建立电磁环境投影。") {
   setStateLabel("未开始", "idle");
   els.presenceText.textContent = message;
   els.presenceScore.textContent = "0";
@@ -889,12 +889,12 @@ function renderIdle(message = "点击开始监测。前 10 秒保持环境稳定
 function renderBaseline() {
   const elapsed = Math.max(0, nowMs() - state.baselineStartedAt);
   const remain = Math.max(0, Math.ceil((BASELINE_MS - elapsed) / 1000));
-  setStateLabel("建立基线", "baseline");
+  setStateLabel("投影建模", "baseline");
   setSerialStatus("串口已连接", "ok");
   els.presenceText.textContent =
     remain > 0
-      ? `正在建立稳定电磁基线，还剩 ${remain} 秒。此时尽量不要走动。`
-      : "基线数据不足，继续等待 CSI 数据。";
+      ? `正在建立电磁环境投影，还剩 ${remain} 秒。此时尽量不要走动。`
+      : "投影样本不足，继续等待 CSI 数据。";
   els.presenceScore.textContent = "0";
   els.scoreFill.style.width = "0%";
   els.calibStatus.textContent = `${Math.min(10, Math.floor(elapsed / 1000))}/10 秒`;
@@ -910,7 +910,7 @@ function renderMonitoring(result) {
   els.presenceText.textContent = safeResult.text;
   els.presenceScore.textContent = String(safeResult.score || 0);
   els.scoreFill.style.width = `${clamp(safeResult.score || 0, 0, 100)}%`;
-  els.calibStatus.textContent = `已建立 阈值 ${Math.round(state.baseline?.threshold || 0)}`;
+  els.calibStatus.textContent = `投影已建立 阈值 ${Math.round(state.baseline?.threshold || 0)}`;
   els.packetCount.textContent = String(state.totalPackets);
   renderLatestPacket(safeResult);
   renderLayerCardsMonitoring(safeResult);
@@ -926,16 +926,16 @@ function renderLatestPacket(result = state.latestResult) {
 }
 
 function renderLayerCardsIdle() {
-  setLayerCard("change", "idle", "未开始", "实时电磁环境变化", 0, "--");
-  setLayerCard("paper", "idle", "未开始", "Doppler / NMI 人体活动确认", 0, "--");
-  setLayerCard("combined", "idle", "未开始", "任一层连续触发即提醒", 0, "连续确认");
+  setLayerCard("change", "idle", "未开始", "归一化 CSI 形态漂移检测", 0, "--");
+  setLayerCard("paper", "idle", "未开始", "Doppler-NMI 动态分段确认", 0, "--");
+  setLayerCard("combined", "idle", "未开始", "双门控 OR 融合与时间持续性判决", 0, "连续确认");
 }
 
 function renderLayerCardsBaseline(remain) {
   const text = remain > 0 ? `还剩 ${remain} 秒` : "等待更多 CSI 数据";
-  setLayerCard("change", "wait", "建基线", text, 0, "--");
-  setLayerCard("paper", "wait", "建基线", text, 0, "--");
-  setLayerCard("combined", "wait", "建基线", "基线完成后开始判断", 0, "连续确认");
+  setLayerCard("change", "wait", "投影建模", text, 0, "--");
+  setLayerCard("paper", "wait", "投影建模", text, 0, "--");
+  setLayerCard("combined", "wait", "等待判决", "投影完成后启动融合判决", 0, "连续确认");
 }
 
 function renderLayerCardsMonitoring(result) {
@@ -947,13 +947,13 @@ function renderLayerCardsMonitoring(result) {
   const paperAvailable = result.paper?.available ?? Boolean(state.baseline?.paper?.available);
 
   if (result.changeHit) {
-    setLayerCard("change", "hit", "触发", "电磁环境连续偏离基线", changeScore, changeThreshold);
+    setLayerCard("change", "hit", "门控触发", "归一化 CSI 动态连续偏离投影", changeScore, changeThreshold);
   } else if (result.artifactReason && result.artifactReason !== "数据不足") {
     setLayerCard("change", "wait", "已过滤", result.artifactReason, changeScore, changeThreshold);
   } else if (result.artifactReason === "数据不足") {
     setLayerCard("change", "wait", "等待数据", "实时窗口 CSI 数据不足", changeScore, changeThreshold);
   } else {
-    setLayerCard("change", "clear", "未触发", "电磁环境接近基线", changeScore, changeThreshold);
+    setLayerCard("change", "clear", "投影一致", "CSI 形态接近电磁环境投影", changeScore, changeThreshold);
   }
 
   if (!paperAvailable) {
@@ -965,7 +965,7 @@ function renderLayerCardsMonitoring(result) {
   }
 
   if (result.present) {
-    setLayerCard("combined", "hit", "有人活动", "任一层连续触发后提醒", combinedScore, "连续确认");
+    setLayerCard("combined", "hit", "有人活动", "任一门控连续触发后提醒", combinedScore, "连续确认");
   } else if (result.changeHit || result.paperHit) {
     setLayerCard("combined", "wait", "等待确认", "已有单层触发，继续观察", combinedScore, "连续确认");
   } else {

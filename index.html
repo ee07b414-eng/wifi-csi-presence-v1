@@ -11,17 +11,16 @@
       <header class="topbar">
         <div>
           <h1>WiFi CSI 实时电磁环境检测</h1>
-          <p>ESP32-C5 · 5 GHz Channel 40 · 一键监测</p>
         </div>
         <div class="status-pill" id="serialStatus">串口未连接</div>
       </header>
 
       <section class="hero-panel" aria-label="实时判断">
         <div class="judgement idle" id="presenceState">未开始</div>
-        <p id="presenceText">点击开始监测。前 10 秒保持环境稳定，页面会自动建立电磁基线。</p>
-        <div class="change-meter" aria-label="电磁环境变化强度">
+        <p id="presenceText">点击开始监测。前 10 秒保持环境稳定，页面会自动建立电磁环境投影。</p>
+        <div class="change-meter" aria-label="双门控融合判决分数">
           <div class="meter-head">
-            <span>综合提醒</span>
+            <span>双门控融合判决</span>
             <strong><span id="presenceScore">0</span>/100</strong>
           </div>
           <div class="score-bar"><span id="scoreFill"></span></div>
@@ -32,28 +31,28 @@
 
       <section class="alert-grid" aria-label="三层判定提醒">
         <article class="alert-card idle" id="changeCard">
-          <span>第一层</span>
+          <span>Gate I · Robust CSI Projection</span>
           <strong id="changeStatus">未开始</strong>
-          <p id="changeText">实时电磁环境变化</p>
+          <p id="changeText">归一化 CSI 形态漂移检测</p>
           <small>分数 <b id="changeScore">0</b> / 阈值 <b id="changeThreshold">--</b></small>
         </article>
         <article class="alert-card idle" id="paperCard">
-          <span>第二层</span>
+          <span>Gate II · Doppler-NMI Graph</span>
           <strong id="paperStatus">未开始</strong>
-          <p id="paperText">Doppler / NMI 人体活动确认</p>
+          <p id="paperText">Doppler-NMI 动态分段确认</p>
           <small>分数 <b id="paperScore">0</b> / 阈值 <b id="paperThreshold">--</b></small>
         </article>
         <article class="alert-card idle" id="combinedCard">
-          <span>综合</span>
+          <span>Fusion · Dual-Gate Decision</span>
           <strong id="combinedStatus">未开始</strong>
-          <p id="combinedText">任一层连续触发即提醒</p>
+          <p id="combinedText">双门控 OR 融合与时间持续性判决</p>
           <small>分数 <b id="combinedScore">0</b> / 阈值 <b id="combinedThreshold">连续确认</b></small>
         </article>
       </section>
 
       <section class="info-grid" aria-label="实时状态">
         <div>
-          <span>基线状态</span>
+          <span>投影状态</span>
           <strong id="calibStatus">未建立</strong>
         </div>
         <div>

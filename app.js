@@ -921,7 +921,9 @@ function renderBaseline() {
 
 function renderMonitoring(result) {
   const safeResult = result || { score: 0, present: false, text: "正在实时监测。" };
-  setStateLabel(safeResult.present ? "有人活动" : "无人活动", safeResult.present ? "present" : "empty");
+  const motionScale = computeMotionScale(safeResult);
+  const motionActive = isMotionActive(safeResult, motionScale);
+  setStateLabel(motionLevelText(motionScale, motionActive), motionStateClass(motionScale, motionActive));
   els.presenceText.textContent = safeResult.text;
   els.presenceScore.textContent = String(safeResult.score || 0);
   els.scoreFill.style.width = `${clamp(safeResult.score || 0, 0, 100)}%`;
@@ -955,7 +957,7 @@ function renderMotionBaseline(remain) {
 function renderMotionTimeline(result) {
   const now = nowMs();
   const scale = computeMotionScale(result);
-  const active = Boolean(result.present || result.changeHit || result.paperHit || scale >= 45);
+  const active = isMotionActive(result, scale);
 
   if (active && !state.currentMotionStartAt) {
     state.currentMotionStartAt = now;
@@ -972,6 +974,7 @@ function renderMotionTimeline(result) {
     state.lastMotionRowAt = now;
     state.motionRows.unshift({
       time: formatClock(now),
+      label: level,
       scale,
       duration: formatDuration(durationMs),
       trigger,
@@ -992,12 +995,24 @@ function computeMotionScale(result) {
   return Math.round(clamp(scale, 0, 100));
 }
 
+function isMotionActive(result, scale) {
+  return Boolean(result?.present || result?.changeHit || result?.paperHit || scale >= 45);
+}
+
 function motionLevelText(scale, active) {
-  if (!active && scale < 25) return "环境稳定";
+  if (!active && scale < 25) return "静稳环境";
   if (scale >= 75) return "强活动";
   if (scale >= 50) return "中等活动";
-  if (scale >= 30) return "微动作 / 弱扰动";
+  if (scale >= 30) return "微动作";
   return "候选波动";
+}
+
+function motionStateClass(scale, active) {
+  if (!active && scale < 25) return "stable";
+  if (scale >= 75) return "strong";
+  if (scale >= 50) return "medium";
+  if (scale >= 30) return "weak";
+  return "candidate";
 }
 
 function motionTriggerText(result, scale) {
@@ -1027,7 +1042,8 @@ function renderMotionRows() {
   }
   els.motionTimelineBody.innerHTML = state.motionRows
     .map(
-      (row) => `<tr><td>${row.time}</td><td>${row.scale}/100</td><td>${row.duration}</td><td>${row.trigger}</td></tr>`,
+      (row) =>
+        `<tr><td>${row.time}</td><td class="scale-cell"><strong>${row.label || "候选波动"}</strong><small>${row.scale}/100</small></td><td>${row.duration}</td><td>${row.trigger}</td></tr>`,
     )
     .join("");
 }

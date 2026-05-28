@@ -29,11 +29,39 @@
 
       <button id="mainButton" class="main-button">开始监测</button>
 
+      <section class="alert-grid" aria-label="三层判定提醒">
+        <article class="alert-card idle" id="changeCard">
+          <span>Gate I · Robust CSI Projection</span>
+          <strong id="changeStatus">待初始化</strong>
+          <p id="changeText">归一化 CSI 形态漂移检测</p>
+          <small>分数 <b id="changeScore">0</b> / 阈值 <b id="changeThreshold">--</b></small>
+        </article>
+        <article class="alert-card idle" id="paperCard">
+          <span>Gate II · Doppler-NMI Graph</span>
+          <strong id="paperStatus">待初始化</strong>
+          <p id="paperText">Doppler-NMI 动态分段确认</p>
+          <small>分数 <b id="paperScore">0</b> / 阈值 <b id="paperThreshold">--</b></small>
+        </article>
+        <article class="alert-card idle" id="combinedCard">
+          <span>Fusion · Dual-Gate Decision</span>
+          <strong id="combinedStatus">待初始化</strong>
+          <p id="combinedText">双门控 OR 融合与时间持续性判决</p>
+          <small>分数 <b id="combinedScore">0</b> / 阈值 <b id="combinedThreshold">连续确认</b></small>
+        </article>
+      </section>
+
       <section class="motion-panel" aria-label="动作尺度时间轴">
         <div class="motion-visual">
-          <div class="motion-orb" id="motionOrb">
-            <span id="motionScale">0</span>
-            <small>动作尺度</small>
+          <div class="motion-mascot" id="motionOrb" aria-label="放电动作尺度动画">
+            <div class="spark spark-a"></div>
+            <div class="spark spark-b"></div>
+            <div class="spark spark-c"></div>
+            <div class="bolt bolt-left"></div>
+            <div class="bolt bolt-right"></div>
+            <div class="mascot-body">
+              <span id="motionScale">0</span>
+              <small>动作尺度</small>
+            </div>
           </div>
           <div class="motion-copy">
             <span>Activity Scale-Time Trace</span>
@@ -60,27 +88,6 @@
         </div>
       </section>
 
-      <section class="alert-grid" aria-label="三层判定提醒">
-        <article class="alert-card idle" id="changeCard">
-          <span>Gate I · Robust CSI Projection</span>
-          <strong id="changeStatus">未开始</strong>
-          <p id="changeText">归一化 CSI 形态漂移检测</p>
-          <small>分数 <b id="changeScore">0</b> / 阈值 <b id="changeThreshold">--</b></small>
-        </article>
-        <article class="alert-card idle" id="paperCard">
-          <span>Gate II · Doppler-NMI Graph</span>
-          <strong id="paperStatus">未开始</strong>
-          <p id="paperText">Doppler-NMI 动态分段确认</p>
-          <small>分数 <b id="paperScore">0</b> / 阈值 <b id="paperThreshold">--</b></small>
-        </article>
-        <article class="alert-card idle" id="combinedCard">
-          <span>Fusion · Dual-Gate Decision</span>
-          <strong id="combinedStatus">未开始</strong>
-          <p id="combinedText">双门控 OR 融合与时间持续性判决</p>
-          <small>分数 <b id="combinedScore">0</b> / 阈值 <b id="combinedThreshold">连续确认</b></small>
-        </article>
-      </section>
-
       <section class="info-grid" aria-label="实时状态">
         <div>
           <span>投影状态</span>
@@ -99,8 +106,31 @@
           <strong id="ampShift">0.00</strong>
         </div>
       </section>
+
+      <section class="method-strip" aria-label="QAOA 论文方法链路">
+        <div>
+          <span>01</span>
+          <strong>CSI 归一化</strong>
+          <p>抑制 AGC / RSSI 全局增益漂移</p>
+        </div>
+        <div>
+          <span>02</span>
+          <strong>Doppler-NMI 图</strong>
+          <p>构造运动敏感子载波分段</p>
+        </div>
+        <div>
+          <span>03</span>
+          <strong>Max-Cut / QAOA 映射</strong>
+          <p>对应论文中的动态特征分区</p>
+        </div>
+        <div>
+          <span>04</span>
+          <strong>持续性融合判决</strong>
+          <p>降低单窗口扰动误报</p>
+        </div>
+      </section>
     </main>
 
-    <script src="./app.js?v=remote-motion-20260528"></script>
+    <script src="./app.js?v=scale-motion-20260528"></script>
   </body>
 </html>

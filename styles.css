@@ -47,9 +47,13 @@ p {
   margin-bottom: 18px;
 }
 
+.topbar > div:first-child {
+  min-width: 0;
+}
+
 .topbar h1 {
-  font-size: 28px;
-  line-height: 1.15;
+  font-size: clamp(20px, 2.6vw, 26px);
+  line-height: 1.18;
 }
 
 .topbar p,

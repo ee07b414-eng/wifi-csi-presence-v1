@@ -12,7 +12,10 @@
         <div>
           <h1>通信感知一体化测试台</h1>
         </div>
-        <div class="status-pill ok" id="linkStatus">模拟链路就绪</div>
+        <div class="status-stack">
+          <div class="status-pill" id="serialStatus">串口未连接</div>
+          <div class="status-pill ok" id="linkStatus">业务流暂停</div>
+        </div>
       </header>
 
       <section class="isac-hero" aria-label="通信感知一体化主视图">
@@ -26,7 +29,7 @@
         <div class="isac-decision">
           <span>CSI Sensing Decision</span>
           <strong id="presenceState">待初始化</strong>
-          <p id="presenceText">启动业务流后，可同时观察视频链路质量与 CSI 感知判断。</p>
+          <p id="presenceText">点击连接 ESP32 并开始监测。页面会先给 5 秒准备时间，再用 10 秒空场 CSI 建立电磁环境投影，同时显示通信业务流指标。</p>
           <div class="change-meter" aria-label="感知置信度">
             <div class="meter-head">
               <span>感知置信度</span>
@@ -38,16 +41,13 @@
       </section>
 
       <section class="isac-controls" aria-label="通信感知测试控制">
-        <button class="test-button danger" id="streamToggle">启动业务流</button>
+        <button class="test-button danger" id="mainButton">连接 ESP32 并开始监测</button>
         <button class="test-button secondary" data-profile="low">低码率</button>
         <button class="test-button medium" data-profile="balanced">均衡码率</button>
         <button class="test-button danger" data-profile="high">高码率</button>
         <button class="test-button stable" data-channel="good">良好信道</button>
         <button class="test-button warn" data-channel="congested">拥塞信道</button>
         <button class="test-button danger" data-channel="fading">衰落信道</button>
-        <button class="test-button stable" data-sensing="stable">静稳</button>
-        <button class="test-button weak" data-sensing="weak">微动作</button>
-        <button class="test-button medium" data-sensing="active">有人活动</button>
       </section>
 
       <section class="comm-grid" aria-label="通信性能">
@@ -74,6 +74,25 @@
         <article>
           <span>链路评分</span>
           <strong><b id="linkScore">0</b>/100</strong>
+        </article>
+      </section>
+
+      <section class="csi-grid" aria-label="真实 CSI 状态">
+        <article>
+          <span>投影状态</span>
+          <strong id="calibStatus">未建立</strong>
+        </article>
+        <article>
+          <span>CSI 帧计数</span>
+          <strong id="packetCount">0</strong>
+        </article>
+        <article>
+          <span>RSSI</span>
+          <strong id="rssiValue">--</strong>
+        </article>
+        <article>
+          <span>归一化幅度偏移</span>
+          <strong id="ampShift">0.00</strong>
         </article>
       </section>
 
@@ -119,6 +138,6 @@
       </section>
     </main>
 
-    <script src="./isac.js?v=version4-isac-20260528"></script>
+    <script src="./isac-real.js?v=version4-real-isac-merge-20260528"></script>
   </body>
 </html>

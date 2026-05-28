@@ -1,0 +1,272 @@
+:root {
+  color-scheme: light;
+  --bg: #f3f6fa;
+  --panel: #ffffff;
+  --line: #d6e0ea;
+  --text: #14202b;
+  --muted: #667789;
+  --blue: #1f6fd2;
+  --green: #0d8a4d;
+  --red: #d64141;
+  --amber: #c98916;
+  --shadow: 0 18px 48px rgba(24, 44, 68, 0.1);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+}
+
+button {
+  font: inherit;
+}
+
+h1,
+p {
+  margin: 0;
+}
+
+.shell {
+  width: min(920px, calc(100vw - 32px));
+  margin: 0 auto;
+  padding: 24px 0 40px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.topbar h1 {
+  font-size: 28px;
+  line-height: 1.15;
+}
+
+.topbar p,
+.hero-panel p,
+.info-grid span,
+.meter-head span,
+.alert-card span,
+.alert-card small {
+  color: var(--muted);
+}
+
+.status-pill {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel);
+  padding: 8px 14px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.status-pill.ok {
+  color: var(--green);
+  border-color: rgba(13, 138, 77, 0.28);
+}
+
+.status-pill.warn {
+  color: var(--amber);
+  border-color: rgba(201, 137, 22, 0.34);
+}
+
+.hero-panel {
+  min-height: 380px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  padding: 42px;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+}
+
+.judgement {
+  font-size: clamp(58px, 10vw, 118px);
+  line-height: 1;
+  font-weight: 850;
+  letter-spacing: 0;
+  color: var(--muted);
+}
+
+.judgement.idle,
+.judgement.baseline {
+  color: var(--amber);
+}
+
+.judgement.empty {
+  color: var(--green);
+}
+
+.judgement.present {
+  color: var(--red);
+}
+
+.hero-panel p {
+  margin-top: 20px;
+  font-size: 18px;
+  line-height: 1.55;
+}
+
+.change-meter {
+  width: min(520px, 100%);
+  margin-top: 28px;
+}
+
+.meter-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  font-size: 15px;
+}
+
+.meter-head strong {
+  color: var(--blue);
+  font-size: 20px;
+}
+
+.score-bar {
+  height: 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+  background: #edf2f7;
+}
+
+.score-bar span {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--green), var(--amber), var(--red));
+  transition: width 180ms ease;
+}
+
+.main-button {
+  width: 100%;
+  min-height: 58px;
+  margin-top: 18px;
+  border: 1px solid var(--blue);
+  border-radius: 8px;
+  background: var(--blue);
+  color: #fff;
+  font-size: 20px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.main-button.stop {
+  border-color: var(--red);
+  background: var(--red);
+}
+
+.main-button:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.alert-grid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.alert-card {
+  min-height: 138px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+
+.alert-card strong {
+  font-size: 26px;
+  line-height: 1.1;
+  color: var(--muted);
+}
+
+.alert-card p {
+  color: var(--text);
+  line-height: 1.35;
+}
+
+.alert-card small {
+  font-size: 13px;
+}
+
+.alert-card.hit {
+  border-color: rgba(214, 65, 65, 0.38);
+}
+
+.alert-card.hit strong {
+  color: var(--red);
+}
+
+.alert-card.clear {
+  border-color: rgba(13, 138, 77, 0.24);
+}
+
+.alert-card.clear strong {
+  color: var(--green);
+}
+
+.alert-card.wait strong {
+  color: var(--amber);
+}
+
+.info-grid {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.info-grid div {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  padding: 14px;
+}
+
+.info-grid span {
+  display: block;
+  font-size: 13px;
+}
+
+.info-grid strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 22px;
+}
+
+@media (max-width: 760px) {
+  .topbar,
+  .alert-grid,
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .hero-panel {
+    padding: 30px 18px;
+  }
+}

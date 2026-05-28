@@ -13,6 +13,8 @@ const PAPER_MAX_PACKETS = 96;
 const PAPER_SEGMENTS = 8;
 const PAPER_GUARD_BINS = 1;
 const PAPER_NMI_BINS = 10;
+const REMOTE_RELAY_URL = getRemoteRelayUrl();
+const REMOTE_PUBLISH_MIN_MS = 500;
 
 const SCORE_FEATURES = [
   { name: "temporalStd", mode: "increase", weight: 0.3 },
@@ -47,6 +49,7 @@ const state = {
   currentMotionStartAt: 0,
   lastMotionRowAt: 0,
   motionRows: [],
+  lastRemotePublishAt: 0,
 };
 
 const els = {};
@@ -893,6 +896,7 @@ function renderIdle(message = "点击开始监测。前 10 秒保持环境稳定
   els.mainButton.disabled = false;
   renderLayerCardsIdle();
   renderMotionIdle();
+  publishRemoteState({ force: true });
 }
 
 function renderBaseline() {
@@ -912,6 +916,7 @@ function renderBaseline() {
   renderLayerCardsBaseline(remain);
   renderMotionBaseline(remain);
   setRunningButton();
+  publishRemoteState();
 }
 
 function renderMonitoring(result) {
@@ -927,6 +932,7 @@ function renderMonitoring(result) {
   renderMotionTimeline(safeResult);
   setSerialStatus("串口已连接", "ok");
   setRunningButton();
+  publishRemoteState();
 }
 
 function renderLatestPacket(result = state.latestResult) {
@@ -1117,6 +1123,7 @@ function setError(message) {
   els.mainButton.disabled = false;
   renderLayerCardsIdle();
   renderMotionIdle();
+  publishRemoteState({ force: true });
 }
 
 function setStateLabel(text, className) {
@@ -1127,6 +1134,89 @@ function setStateLabel(text, className) {
 function setSerialStatus(text, className) {
   els.serialStatus.textContent = text;
   els.serialStatus.className = `status-pill ${className}`.trim();
+}
+
+function getRemoteRelayUrl() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const fromQuery = params.get("relay");
+    if (fromQuery) {
+      localStorage.setItem("csiRemoteRelayUrl", fromQuery);
+      return fromQuery;
+    }
+    return localStorage.getItem("csiRemoteRelayUrl") || "http://127.0.0.1:8091";
+  } catch (_error) {
+    return "http://127.0.0.1:8091";
+  }
+}
+
+function publishRemoteState(options = {}) {
+  if (!REMOTE_RELAY_URL) return;
+  const now = nowMs();
+  if (!options.force && now - state.lastRemotePublishAt < REMOTE_PUBLISH_MIN_MS) return;
+  state.lastRemotePublishAt = now;
+
+  const endpoint = `${REMOTE_RELAY_URL.replace(/\/$/, "")}/api/state`;
+  sendRemotePayload(endpoint, buildRemoteStatePayload(now));
+}
+
+function sendRemotePayload(endpoint, payload) {
+  const body = JSON.stringify(payload);
+  if (typeof fetch === "function") {
+    fetch(endpoint, {
+      method: "POST",
+      mode: "cors",
+      headers: { "Content-Type": "application/json" },
+      body,
+    }).catch(() => {
+      // Remote display is optional; the detector must keep running even if the relay is closed.
+    });
+    return;
+  }
+
+  if (typeof XMLHttpRequest !== "undefined") {
+    try {
+      const request = new XMLHttpRequest();
+      request.open("POST", endpoint, true);
+      request.setRequestHeader("Content-Type", "application/json");
+      request.send(body);
+    } catch (_error) {
+      // Remote display is optional; the detector must keep running even if the relay is closed.
+    }
+  }
+}
+
+function buildRemoteStatePayload(now) {
+  const score = Number(els.presenceScore?.textContent || 0);
+  return {
+    phase: state.phase,
+    source: "mac-browser",
+    localTime: now,
+    pageTitle: document.title,
+    presenceLabel: els.presenceState?.textContent || "等待采集",
+    present: Boolean(state.latestResult?.present),
+    score: Number.isFinite(score) ? score : 0,
+    text: els.presenceText?.textContent || "",
+    serialStatus: els.serialStatus?.textContent || "串口未连接",
+    packetCount: state.totalPackets,
+    rssi: els.rssiValue?.textContent || "--",
+    ampShift: els.ampShift?.textContent || "0.00",
+    motionScale: els.motionScale?.textContent || "0",
+    motionLevel: els.motionLevel?.textContent || "等待数据",
+    motionDuration: els.motionDuration?.textContent || "持续时间 0.0 秒",
+    change: buildRemoteLayerPayload("change"),
+    paper: buildRemoteLayerPayload("paper"),
+    combined: buildRemoteLayerPayload("combined"),
+  };
+}
+
+function buildRemoteLayerPayload(prefix) {
+  return {
+    status: els[`${prefix}Status`]?.textContent || "待初始化",
+    text: els[`${prefix}Text`]?.textContent || "",
+    score: els[`${prefix}Score`]?.textContent || "0",
+    threshold: els[`${prefix}Threshold`]?.textContent || "--",
+  };
 }
 
 function resetRun() {
@@ -1142,6 +1232,7 @@ function resetRun() {
   state.currentMotionStartAt = 0;
   state.lastMotionRowAt = 0;
   state.motionRows = [];
+  state.lastRemotePublishAt = 0;
   if (state.tickTimer) {
     window.clearInterval(state.tickTimer);
     state.tickTimer = null;

@@ -1,4 +1,5 @@
 const BAUD_RATE = 921600;
+const PREPARE_MS = 5000;
 const BASELINE_MS = 10000;
 const WINDOW_MS = 1000;
 const STEP_MS = 500;
@@ -42,6 +43,7 @@ const state = {
   packets: [],
   baselinePackets: [],
   baseline: null,
+  prepStartedAt: 0,
   baselineStartedAt: 0,
   totalPackets: 0,
   latestResult: null,
@@ -121,11 +123,12 @@ async function startMonitoring() {
     await state.port.open({ baudRate: BAUD_RATE, bufferSize: 65536 });
     state.readerActive = true;
     state.readPromise = readSerialLoop();
-    state.phase = "baseline";
-    state.baselineStartedAt = nowMs();
+    state.phase = "preparing";
+    state.prepStartedAt = nowMs();
+    state.baselineStartedAt = 0;
     state.tickTimer = window.setInterval(tick, 250);
     setBusy(false);
-    renderBaseline();
+    renderPreparing();
   } catch (error) {
     setBusy(false);
     if (error?.name === "NotFoundError") {
@@ -231,6 +234,19 @@ function processSerialLine(line) {
 }
 
 function tick() {
+  if (state.phase === "preparing") {
+    const elapsed = nowMs() - state.prepStartedAt;
+    if (elapsed >= PREPARE_MS) {
+      state.phase = "baseline";
+      state.baselineStartedAt = nowMs();
+      state.baselinePackets = [];
+      renderBaseline();
+      return;
+    }
+    renderPreparing();
+    return;
+  }
+
   if (state.phase === "baseline") {
     const elapsed = nowMs() - state.baselineStartedAt;
     if (elapsed >= BASELINE_MS && state.baselinePackets.length >= MIN_BASELINE_PACKETS) {
@@ -882,7 +898,7 @@ function parseCsiLine(line) {
   };
 }
 
-function renderIdle(message = "点击开始监测。前 10 秒保持环境稳定，页面会自动建立电磁环境投影。") {
+function renderIdle(message = "点击开始监测。先给 5 秒准备时间，随后 10 秒保持空场稳定并建立电磁环境投影。") {
   setStateLabel("未开始", "idle");
   els.presenceText.textContent = message;
   els.presenceScore.textContent = "0";
@@ -897,6 +913,23 @@ function renderIdle(message = "点击开始监测。前 10 秒保持环境稳定
   renderLayerCardsIdle();
   renderMotionIdle();
   publishRemoteState({ force: true });
+}
+
+function renderPreparing() {
+  const elapsed = Math.max(0, nowMs() - state.prepStartedAt);
+  const remain = Math.max(0, Math.ceil((PREPARE_MS - elapsed) / 1000));
+  setStateLabel("准备空场", "baseline");
+  setSerialStatus("串口已连接", "ok");
+  els.presenceText.textContent = `准备倒计时 ${remain} 秒。请离开链路附近或保持空场，倒计时结束后自动采集 10 秒空场投影。`;
+  els.presenceScore.textContent = "0";
+  els.scoreFill.style.width = "0%";
+  els.calibStatus.textContent = `准备 ${Math.min(5, Math.floor(elapsed / 1000))}/5 秒`;
+  els.packetCount.textContent = String(state.totalPackets);
+  renderLatestPacket();
+  renderLayerCardsPreparing(remain);
+  renderMotionPreparing(remain);
+  setRunningButton();
+  publishRemoteState();
 }
 
 function renderBaseline() {
@@ -954,6 +987,10 @@ function renderMotionBaseline(remain) {
   setMotionPanel(0, "投影建模", `投影剩余 ${remain} 秒`, false);
 }
 
+function renderMotionPreparing(remain) {
+  setMotionPanel(0, "准备空场", `准备倒计时 ${remain} 秒`, false);
+}
+
 function renderMotionTimeline(result) {
   const now = nowMs();
   const scale = computeMotionScale(result);
@@ -970,7 +1007,7 @@ function renderMotionTimeline(result) {
   const trigger = motionTriggerText(result, scale);
   setMotionPanel(scale, level, `持续时间 ${formatDuration(durationMs)}`, active);
 
-  if (now - state.lastMotionRowAt >= 1000) {
+  if (active && now - state.lastMotionRowAt >= 1000) {
     state.lastMotionRowAt = now;
     state.motionRows.unshift({
       time: formatClock(now),
@@ -1037,7 +1074,7 @@ function setMotionPanel(scale, level, durationText, active) {
 function renderMotionRows() {
   if (!els.motionTimelineBody) return;
   if (!state.motionRows.length) {
-    els.motionTimelineBody.innerHTML = '<tr><td colspan="4">开始监测后实时更新</td></tr>';
+    els.motionTimelineBody.innerHTML = '<tr><td colspan="4">有动作时自动记录</td></tr>';
     return;
   }
   els.motionTimelineBody.innerHTML = state.motionRows
@@ -1068,6 +1105,13 @@ function renderLayerCardsBaseline(remain) {
   setLayerCard("change", "wait", "投影建模", text, 0, "--");
   setLayerCard("paper", "wait", "投影建模", text, 0, "--");
   setLayerCard("combined", "wait", "等待判决", "投影完成后启动融合判决", 0, "连续确认");
+}
+
+function renderLayerCardsPreparing(remain) {
+  const text = `准备倒计时 ${remain} 秒`;
+  setLayerCard("change", "wait", "准备空场", "暂不写入投影样本", 0, "--");
+  setLayerCard("paper", "wait", "等待预热", text, 0, "--");
+  setLayerCard("combined", "wait", "尚未判决", "5 秒后自动进入 10 秒投影采样", 0, "连续确认");
 }
 
 function renderLayerCardsMonitoring(result) {
@@ -1241,6 +1285,7 @@ function resetRun() {
   state.packets = [];
   state.baselinePackets = [];
   state.baseline = null;
+  state.prepStartedAt = 0;
   state.baselineStartedAt = 0;
   state.totalPackets = 0;
   state.latestResult = null;
